@@ -1,4 +1,5 @@
 ﻿using AuthorBookApi.DTOs;
+using AuthorBookApi.Exceptions;
 using AuthorBookApi.Models;
 using AuthorBookApi.Repositories;
 using AutoMapper;
@@ -8,43 +9,50 @@ namespace AuthorBookApi.Services
 {
     public class AuthorDetailsService :IAuthorDetailsService
     {
-        private readonly IRepository<AuthorDetail> _repository1;
-        private readonly IRepository<Author> _authorRepository; //faltu
+        private readonly IRepository<AuthorDetail> _repository;
 
         private readonly IMapper _mapper;
         public AuthorDetailsService(IRepository<AuthorDetail> detailRepository, IMapper mapper)
         {
-            _repository1 = detailRepository;
+            _repository = detailRepository;
             _mapper = mapper;
         }
         public int AddAuthorDetails(AuthorDetailsDTO detailDTO)
         {
             var detail = _mapper.Map<AuthorDetail>(detailDTO);
-            _repository1.Add(detail);
+            _repository.Add(detail);
             return detail.Id;
         }
 
         public bool DeleteAuthorDetails(int id)
         {
-            var detail = _repository1.Get(id);
+            var detail = _repository.Get(id);
             if (detail != null)
             {
-                _repository1.Delete(detail);
+                _repository.Delete(detail);
                 return true;
             }
-            return false;
+            throw new AuthorDetailsNotFoundException("No Author Details Exist");
         }
 
         public List<AuthorDetailsDTO> GetAuthorsDetails()
         {
-            var details = _repository1.GetAll().ToList();
+            var details = _repository.GetAll().ToList();
+            if(details == null)
+            {
+                throw new AuthorDetailsNotFoundException("No Author Details Exist");
+            }
             List<AuthorDetailsDTO> detailDTO = _mapper.Map<List<AuthorDetailsDTO>>(details);
             return detailDTO;
         }
 
         public AuthorDetailsDTO GetById(int id)
         {
-            var details = _repository1.Get(id);
+            var details = _repository.Get(id);
+            if (details == null)
+            {
+                throw new AuthorDetailsNotFoundException("No Author Details Exist");
+            }
             AuthorDetailsDTO detailDTO = _mapper.Map<AuthorDetailsDTO>(details);
             return detailDTO;
         }
@@ -52,22 +60,30 @@ namespace AuthorBookApi.Services
         public bool UpdateAuthorDetails(AuthorDetailsDTO detailDTO)
         {
             var detail = _mapper.Map<AuthorDetail>(detailDTO);
-            var existingdetail = _repository1.GetAll().AsNoTracking().FirstOrDefault(a => a.Id == detail.Id);
+            var existingdetail = _repository.GetAll().AsNoTracking().FirstOrDefault(a => a.Id == detail.Id);
             if (existingdetail != null)
             {
-                _repository1.Update(detail);
+                _repository.Update(detail);
                 return true;
             }
-            return false;
+            throw new AuthorDetailsNotFoundException("No Author Details Exist");
         }
 
         public AuthorDetailsDTO GetByAuthorId(int id)
         {
-            var authorDetails = _repository1.GetAll().Include(a => a.Author).ToList();
-            var author = authorDetails.Where(a => a.AuthorId == id).FirstOrDefault();
-            AuthorDetailsDTO authorDetail = _mapper.Map<AuthorDetailsDTO>(author);
-            return authorDetail;
+            var authorDetails = _repository.GetAll().Where(a => a.AuthorId == id).FirstOrDefault();
+            if (authorDetails == null)
+            {
+                throw new AuthorDetailsNotFoundException("No Author Details Exist");
+            }
+            AuthorDetailsDTO authorDetailDTO = _mapper.Map<AuthorDetailsDTO>(authorDetails);
+            return authorDetailDTO;
+
         }
+
+
 
     }
 }
+
+

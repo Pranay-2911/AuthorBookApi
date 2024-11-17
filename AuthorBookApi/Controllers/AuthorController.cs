@@ -57,19 +57,22 @@ namespace AuthorBookApi.Controllers
             return NotFound();
         }
 
-        [HttpGet("author/{name}")]
+        [HttpGet("author/{name}")] // 1st find by author name
         public IActionResult GetByName(string name)
         {
             var authorDTO = _services.GetByName(name);
             return Ok(authorDTO);
         }
 
-        [HttpGet("authorBook/{id}")]
-        public IActionResult GetBooks(int id)
+        [HttpGet("Book/{id}")]
+        public IActionResult GetAuthorByBooks(int id) // 4th
         {
             var authorDto = _services.GetAuthorByBookID(id);
             return Ok(authorDto);
         }
+
+
+        
 
 
     }

@@ -13,8 +13,8 @@ namespace AuthorBookApi.Services
         public AuthorDTO GetByName(string name);
 
 
-
         public AuthorDTO GetAuthorByBookID(int id);
+
 
     }
 }

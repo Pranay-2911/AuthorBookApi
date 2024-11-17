@@ -1,4 +1,5 @@
 ﻿using AuthorBookApi.DTOs;
+using AuthorBookApi.Exceptions;
 using AuthorBookApi.Models;
 using AuthorBookApi.Repositories;
 using AutoMapper;
@@ -30,12 +31,16 @@ namespace AuthorBookApi.Services
                 _repository.Delete(book);
                 return true;
             }
-            return false;
+            throw new BookNotFoundException("No Such Book Exist");
         }
 
         public List<BookDTO> GetBooks()
         {
             var books =  _repository.GetAll().ToList();
+            if(books.Count == 0)
+            {
+                throw new BookNotFoundException("No Such Book Exist");
+            }
             List<BookDTO> bookDTOs = _mapper.Map<List<BookDTO>>(books);
             return bookDTOs;    
 
@@ -44,6 +49,10 @@ namespace AuthorBookApi.Services
         public BookDTO GetById(int id)
         {
             var book = _repository.Get(id);
+            if (book == null)
+            {
+                throw new BookNotFoundException("No Such Book Exist");
+            }
             BookDTO bookDTO = _mapper.Map<BookDTO>(book);
             return bookDTO;
         }
@@ -57,15 +66,20 @@ namespace AuthorBookApi.Services
                 _repository.Update(book);
                 return true;
             }
-            return false;
+            throw new BookNotFoundException("No Such Book Exist");
         }
-        public BookDTO GetBookByAuthorID(int id)
-        {
-            var books = _repository.GetAll().Include(b => b.Author).ToList();
-            var book = books.FirstOrDefault(b => b.Id == id);
-            BookDTO bookDTO = _mapper.Map<BookDTO>(book);
 
+        public List<BookDTO> GetBookByAuthorID(int id)
+        {
+            var book = _repository.GetAll().Where(a=> a.AuthorId == id).ToList();
+            if (book == null)
+            {
+                throw new BookNotFoundException("No Such Book Exist");
+            }
+            List<BookDTO> bookDTO = _mapper.Map<List<BookDTO>>(book);
             return bookDTO;
         }
+
+
     }
 }

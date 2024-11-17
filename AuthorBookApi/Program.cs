@@ -1,5 +1,6 @@
 
 using AuthorBookApi.Data;
+using AuthorBookApi.Exceptions;
 using AuthorBookApi.Mapper;
 using AuthorBookApi.Repositories;
 using AuthorBookApi.Services;
@@ -22,11 +23,9 @@ namespace AuthorBookApi
             builder.Services.AddAutoMapper(typeof(MapperProfile));  
             builder.Services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddTransient<IBookService, BookService>();
-            builder.Services.AddTransient<IBookRepository, BookRepository>();
             builder.Services.AddTransient<IAuthorService, AuthorService>();
-            builder.Services.AddTransient<IAuthorRepository, AuthorRepository>();
             builder.Services.AddTransient<IAuthorDetailsService, AuthorDetailsService>();
-            builder.Services.AddTransient<IAuthorDetailsRepository, AuthorDetailsRepository>();
+           
 
             builder.Services.AddControllers().AddJsonOptions(x =>
             {
@@ -37,6 +36,8 @@ namespace AuthorBookApi
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddExceptionHandler<AppExceptionHandler>();
+
 
             var app = builder.Build();
 
@@ -47,6 +48,7 @@ namespace AuthorBookApi
                 app.UseSwaggerUI();
             }
 
+            app.UseExceptionHandler(_ => {  });
             app.UseHttpsRedirection();
 
             app.UseAuthorization();

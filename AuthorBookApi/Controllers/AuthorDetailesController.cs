@@ -58,7 +58,7 @@ namespace AuthorBookApi.Controllers
             return NotFound();
         }
 
-        [HttpGet("author/{authorId}")]
+        [HttpGet("author/{authorId}")] // 2nd Get AuthorDetails by Author Id
         public IActionResult GetByAuthorID(int authorId)
         {
             var detailDTO = _services.GetByAuthorId(authorId);
